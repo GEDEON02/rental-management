@@ -7,10 +7,15 @@ const connectDB = require("./config/db");
 dotenv.config();
 
 const app = express();
+const productRoutes = require("./routes/productRoutes");
 
 // middleware
 app.use(cors());
 app.use(express.json());
+const authRoutes = require("./routes/authRoutes");
+app.use("/api/auth", authRoutes);
+app.use("/api/products", productRoutes);
+
 
 // test route
 app.get("/", (req, res) => {
