@@ -9,43 +9,19 @@ function Cart() {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const handleCheckout = async (deliverySlot) => {
+  const handleCheckout = (deliverySlot) => {
     if (!user) {
       alert("Please login to checkout");
       navigate("/login");
       return;
     }
 
-    try {
-      const token = user.token;
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
-
-      // Loop through cart and create orders (In real app, backend should handle bulk order)
-      for (const item of cart) {
-        await axios.post(
-          "http://localhost:4999/api/orders",
-          {
-            product: item.product._id,
-            rentType: item.rentType,
-            duration: item.duration,
-            totalAmount: item.totalRent,
-            deliverySlot: deliverySlot,
-          },
-          config
-        );
+    navigate("/checkout", {
+      state: {
+        cart,
+        deliverySlot
       }
-
-      alert("Order placed successfully!");
-      clearCart();
-      navigate("/"); // Redirect to home or orders page
-    } catch (error) {
-      console.error(error);
-      alert("Checkout failed");
-    }
+    });
   };
 
   const calculateTotal = () => {
@@ -92,19 +68,19 @@ function Cart() {
       <div style={{ marginTop: "40px", padding: "20px", background: "var(--bg-card)", borderRadius: "12px" }}>
         <h3 style={{ marginBottom: "20px" }}>Delivery Options</h3>
         <div className="form-group">
-            <label className="form-label">Select Delivery Slot</label>
-            <select 
-                className="form-input"
-                id="deliverySlot"
-                defaultValue="Standard Delivery (24-48 hrs)"
-            >
-                <option value="Instant (2-4 hrs) - ₹199">⚡ Instant (2-4 hrs) - ₹199</option>
-                <option value="Same Day (Evening) - ₹99">Same Day (Evening) - ₹99</option>
-                <option value="Standard Delivery (24-48 hrs)">Standard Delivery (24-48 hrs) - FREE</option>
-            </select>
-            <p style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginTop: "10px" }}>
-                * Instant delivery available for Mumbai users only.
-            </p>
+          <label className="form-label">Select Delivery Slot</label>
+          <select
+            className="form-input"
+            id="deliverySlot"
+            defaultValue="Standard Delivery (24-48 hrs)"
+          >
+            <option value="Instant (2-4 hrs) - ₹199">⚡ Instant (2-4 hrs) - ₹199</option>
+            <option value="Same Day (Evening) - ₹99">Same Day (Evening) - ₹99</option>
+            <option value="Standard Delivery (24-48 hrs)">Standard Delivery (24-48 hrs) - FREE</option>
+          </select>
+          <p style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginTop: "10px" }}>
+            * Instant delivery available for Mumbai users only.
+          </p>
         </div>
       </div>
 
@@ -112,12 +88,12 @@ function Cart() {
         <h3 style={{ fontSize: "1.5rem", marginBottom: "20px" }}>
           Grand Total: <span style={{ color: "var(--primary)" }}>₹{calculateTotal()}</span>
         </h3>
-        <button 
-            onClick={() => {
-                const slot = document.getElementById("deliverySlot").value;
-                handleCheckout(slot);
-            }} 
-            style={{ fontSize: "1.1rem", padding: "1rem 3rem" }}
+        <button
+          onClick={() => {
+            const slot = document.getElementById("deliverySlot").value;
+            handleCheckout(slot);
+          }}
+          style={{ fontSize: "1.1rem", padding: "1rem 3rem" }}
         >
           Checkout
         </button>

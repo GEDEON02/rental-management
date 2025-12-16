@@ -13,6 +13,8 @@ import Products from "./pages/user/Products";
 import ProductDetails from "./pages/user/ProductDetails";
 import Cart from "./pages/user/Cart";
 import UserDashboard from "./pages/user/UserDashboard";
+import Checkout from "./pages/user/Checkout";
+import MyOrders from "./pages/user/MyOrders";
 
 // ADMIN PAGES
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -40,6 +42,8 @@ function App() {
               <Route path="/products/:id" element={<ProductDetails />} />
               <Route path="/products/:id" element={<ProductDetails />} />
               <Route path="/cart" element={<Cart />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/my-orders" element={<MyOrders />} />
               <Route path="/dashboard" element={<UserDashboard />} />
 
               {/* ADMIN ROUTES - In real app, wrap in ProtectedRoute */}

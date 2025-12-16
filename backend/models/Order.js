@@ -37,12 +37,24 @@ const orderSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["active", "returned"],
-      default: "active",
+      enum: ["pending", "approved", "rejected", "active", "returned", "cancelled"], // Added new statuses
+      default: "pending",
     },
     deliverySlot: {
       type: String, 
-      required: true, // e.g. "Today, 2PM - 4PM"
+      required: true, 
+    },
+    address: {
+      type: String,
+      required: true,
+    },
+    phone: {
+      type: String,
+      required: true,
+    },
+    paymentMethod: {
+      type: String,
+      default: "COD",
     },
   },
   { timestamps: true }
