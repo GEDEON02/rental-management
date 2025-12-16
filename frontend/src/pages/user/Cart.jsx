@@ -1,20 +1,127 @@
-function Cart({ cart, goBack }) {
+import { useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import CartContext from "../../context/CartContext";
+import AuthContext from "../../context/AuthContext";
+import axios from "axios";
+
+function Cart() {
+  const { cart, removeFromCart, clearCart } = useContext(CartContext);
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const handleCheckout = async (deliverySlot) => {
+    if (!user) {
+      alert("Please login to checkout");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const token = user.token;
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      // Loop through cart and create orders (In real app, backend should handle bulk order)
+      for (const item of cart) {
+        await axios.post(
+          "http://localhost:4999/api/orders",
+          {
+            product: item.product._id,
+            rentType: item.rentType,
+            duration: item.duration,
+            totalAmount: item.totalRent,
+            deliverySlot: deliverySlot,
+          },
+          config
+        );
+      }
+
+      alert("Order placed successfully!");
+      clearCart();
+      navigate("/"); // Redirect to home or orders page
+    } catch (error) {
+      console.error(error);
+      alert("Checkout failed");
+    }
+  };
+
+  const calculateTotal = () => {
+    return cart.reduce((acc, item) => acc + item.totalRent, 0);
+  };
+
+  if (cart.length === 0) {
+    return (
+      <div style={{ padding: "40px", textAlign: "center" }}>
+        <h2>Your Cart is Empty</h2>
+        <Link to="/products" style={{ marginTop: "20px", display: "inline-block" }}>
+          Browse Products
+        </Link>
+      </div>
+    );
+  }
+
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Your Cart</h2>
+    <div style={{ padding: "40px", maxWidth: "800px", margin: "0 auto" }}>
+      <h2 style={{ marginBottom: "30px" }}>Your Cart ({cart.length} items)</h2>
 
-      {cart.length === 0 && <p>Cart is empty</p>}
+      <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+        {cart.map((item, index) => (
+          <div key={index} className="card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div>
+              <h3>{item.product.name}</h3>
+              <p style={{ color: "var(--text-muted)" }}>
+                {item.duration} {item.rentType}(s) @ {item.rentType === 'day' ? item.product.rentPerDay : item.product.rentPerWeek}/{item.rentType}
+              </p>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <p style={{ fontWeight: "bold", fontSize: "1.2rem", marginBottom: "5px" }}>₹{item.totalRent}</p>
+              <button
+                onClick={() => removeFromCart(item.product._id)}
+                style={{ background: "transparent", color: "var(--secondary)", padding: 0 }}
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
 
-      {cart.map((item, index) => (
-        <div key={index} style={{ border: "1px solid #ccc", marginBottom: "10px", padding: "10px" }}>
-          <h3>{item.product.name}</h3>
-          <p>Rent Type: {item.rentType}</p>
-          <p>Duration: {item.duration}</p>
-          <p>Total: ₹{item.totalRent}</p>
+      <div style={{ marginTop: "40px", padding: "20px", background: "var(--bg-card)", borderRadius: "12px" }}>
+        <h3 style={{ marginBottom: "20px" }}>Delivery Options</h3>
+        <div className="form-group">
+            <label className="form-label">Select Delivery Slot</label>
+            <select 
+                className="form-input"
+                id="deliverySlot"
+                defaultValue="Standard Delivery (24-48 hrs)"
+            >
+                <option value="Instant (2-4 hrs) - ₹199">⚡ Instant (2-4 hrs) - ₹199</option>
+                <option value="Same Day (Evening) - ₹99">Same Day (Evening) - ₹99</option>
+                <option value="Standard Delivery (24-48 hrs)">Standard Delivery (24-48 hrs) - FREE</option>
+            </select>
+            <p style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginTop: "10px" }}>
+                * Instant delivery available for Mumbai users only.
+            </p>
         </div>
-      ))}
+      </div>
 
-      <button onClick={goBack}>Back to Products</button>
+      <div style={{ marginTop: "40px", textAlign: "right" }}>
+        <h3 style={{ fontSize: "1.5rem", marginBottom: "20px" }}>
+          Grand Total: <span style={{ color: "var(--primary)" }}>₹{calculateTotal()}</span>
+        </h3>
+        <button 
+            onClick={() => {
+                const slot = document.getElementById("deliverySlot").value;
+                handleCheckout(slot);
+            }} 
+            style={{ fontSize: "1.1rem", padding: "1rem 3rem" }}
+        >
+          Checkout
+        </button>
+      </div>
     </div>
   );
 }

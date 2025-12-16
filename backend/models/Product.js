@@ -12,19 +12,20 @@ const productSchema = new mongoose.Schema(
       required: true,
     },
 
-    rentPerDay: {
-      type: Number,
-      required: true,
-    },
-
-    rentPerWeek: {
-      type: Number,
-      required: true,
-    },
+    pricing: [
+      {
+        tenure: { type: String, required: true }, // e.g., "1 Day", "3 Days"
+        price: { type: Number, required: true },
+      },
+    ],
 
     available: {
       type: Boolean,
       default: true,
+    },
+    image: {
+      type: String,
+      required: false,
     },
   },
   { timestamps: true }
