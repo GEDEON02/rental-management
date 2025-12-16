@@ -40,6 +40,10 @@ const orderSchema = new mongoose.Schema(
       enum: ["active", "returned"],
       default: "active",
     },
+    deliverySlot: {
+      type: String, 
+      required: true, // e.g. "Today, 2PM - 4PM"
+    },
   },
   { timestamps: true }
 );
